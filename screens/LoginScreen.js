@@ -11,7 +11,8 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import axiosInstance from '../api/axiosInstance'; // Adjust path as needed
+import axiosInstance from '../api/axiosInstance';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -28,11 +29,17 @@ export default function LoginScreen({ navigation }) {
         password,
       });
 
-      // Assuming your backend sends the token and user data directly
-      const { token, user } = response.data;
+      // --- THE CRITICAL FIX IS ON THIS LINE ---
+      // Changed from 'response.data.data' to 'response.data'
+      const { token, user } = response.data; 
+      // --- END OF CRITICAL FIX ---
 
-      // TODO: Store the token securely (e.g., using AsyncStorage) for future requests
-      // For now, we'll just log it and navigate.
+      // Store the token securely using AsyncStorage
+      await AsyncStorage.setItem('userToken', token);
+      
+      // Optionally, store user data as well
+      await AsyncStorage.setItem('userData', JSON.stringify(user));
+
       console.log('Login successful! Token:', token);
       console.log('Logged in user data:', user);
 
@@ -40,16 +47,20 @@ export default function LoginScreen({ navigation }) {
       Alert.alert('Success', 'Logged in successfully!');
 
       // Navigate to the Home screen on successful login
-      navigation.replace('Home');
-
+      navigation.replace('MainApp');
     } catch (error) {
       console.error('Login error:', error.response ? error.response.data : error.message);
       let errorMessage = 'An unexpected error occurred during login.';
-      if (error.response && error.response.data && error.response.data.error) {
-        if (typeof error.response.data.error === 'string') {
-          errorMessage = error.response.data.error;
-        } else if (Array.isArray(error.response.data.error)) {
-          errorMessage = error.response.data.error.join('\n');
+      if (error.response && error.response.data) {
+        if (error.response.data.error) {
+          if (typeof error.response.data.error === 'string') {
+            errorMessage = error.response.data.error;
+          } else if (Array.isArray(error.response.data.error)) {
+            errorMessage = error.response.data.error.join('\n');
+          }
+        } else if (error.response.data.message) {
+          // Fallback for general error messages from backend
+          errorMessage = error.response.data.message;
         }
       } else if (error.message) {
         errorMessage = error.message;
