@@ -7,7 +7,7 @@ import axios from 'axios';
 // Example for physical device: const API_BASE_URL = 'http://192.168.1.100:5000/api';
 // Example for Android Emulator: const API_BASE_URL = 'http://10.0.2.2:5000/api';
 // If deployed: const API_BASE_URL = 'https://your-deployed-backend.com/api';
-const API_BASE_URL = 'http://192.168.0.114:5000/api'; // This is the standard alias for host localhost; // Common for Android Emulator to access host's localhost
+const API_BASE_URL = 'https://medai-backend-1-703k.onrender.com'; // This is the standard alias for host localhost; // Common for Android Emulator to access host's localhost
 
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
